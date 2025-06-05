@@ -1,3 +1,4 @@
-dash
-dash-cytoscape
+streamlit>=1.20
 pandas
+networkx
+pyvis
