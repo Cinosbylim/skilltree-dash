@@ -148,33 +148,45 @@
   font-size: 14px;
   border-radius: 6px;
   border: 1px solid #ccc;
-" onkeyup="searchNode()">
+">
 <script>
-function searchNode() {
-    // 입력어 소문자·공백 제거
-    var input = document.getElementById('searchBox').value.toLowerCase().trim();
-    // 모든 노드 정보 가져오기
-    var nodes = network.body.data.nodes.get();
-    // 입력어를 포함하는 노드를 전부 필터링
-    var matches = nodes.filter(n =>
-        n.label &&
-        n.label.toLowerCase().includes(input)
-    );
-    if (matches.length > 0) {
-        // ID 배열 생성
-        var ids = matches.map(n => n.id);
-        // 해당 노드들 선택
-        network.selectNodes(ids);
-        // 선택된 노드들이 잘 보이도록 화면 자동 조정
-        network.fit({
-            nodes: ids,
-            animation: {
-                duration: 500,
-                easingFunction: 'easeInOutQuad'
-            }
-        });
+  // 매칭되는 노드 ID 저장용
+  var matchNodes = [];
+  var currentIndex = 0;
+
+  // Enter 키 누를 때마다 순환 포커스
+  document.getElementById('searchBox').addEventListener('keyup', function(e) {
+    // 검색어가 변경되면 인덱스 초기화
+    if (e.key !== 'Enter') {
+      currentIndex = 0;
+      return;
     }
-}
+    var input = this.value.toLowerCase().trim();
+    // 매칭 노드 목록 갱신
+    var nodes = network.body.data.nodes.get();
+    matchNodes = nodes
+      .filter(n => n.label && n.label.toLowerCase().includes(input))
+      .map(n => n.id);
+
+    if (matchNodes.length === 0) {
+      return; // 매칭 없음
+    }
+    // 순환 인덱스 계산
+    if (currentIndex >= matchNodes.length) {
+      currentIndex = 0;
+    }
+    var nodeId = matchNodes[currentIndex];
+    // 선택 & 포커스
+    network.selectNodes([nodeId]);
+    network.focus(nodeId, {
+      scale: 0.5,
+      animation: {
+        duration: 500,
+        easingFunction: 'easeInOutQuad'
+      }
+    });
+    currentIndex++;
+  });
 </script>
 
         <div class="card" style="width: 100%">
