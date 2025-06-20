@@ -238,7 +238,7 @@
                   // adding nodes and edges to the graph
                   data = {nodes: nodes, edges: edges};
 
-                  var options = {"interaction": {"navigationButtons": true, "keyboard": {"enabled": true, "bindToWindow": false}}, "layout": {"hierarchical": {"enabled": true, "direction": "LR", "sortMethod": "directed", "levelSeparation": 200, "nodeSpacing": 150, "treeSpacing": 200}}, "physics": {"hierarchicalRepulsion": {"centralGravity": 0.0, "springLength": 200, "springConstant": 0.01, "nodeDistance": 120}, "minVelocity": 0.75}, "nodes": {"shape": "box", "shapeProperties": {"borderRadius": 8}, "widthConstraint": {"minimum": 120}, "margin": 10, "font": {"size": 14, "face": "Tahoma", "vadjust": 0, "align": "center"}}, "edges": {"color": "#CCCCCC", "arrows": {"to": {"enabled": true, "type": "arrow"}}, "smooth": {"type": "cubicBezier", "forceDirection": "none", "roundness": 0.5}}};
+                  var options = {"interaction": {"navigationButtons": true, "keyboard": {"enabled": true, "bindToWindow": false}}, "physics": {"barnesHut": {"gravitationalConstant": -30000, "centralGravity": 0.3, "springLength": 250, "springConstant": 0.05, "damping": 0.09}}, "nodes": {"shape": "circle", "shapeProperties": {"useBorderWithLabel": true}, "widthConstraint": {"minimum": 120}, "margin": 10, "font": {"size": 16, "face": "Tahoma", "vadjust": 0, "align": "center"}}};
 
                   
 
