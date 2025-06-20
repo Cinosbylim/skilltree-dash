@@ -150,11 +150,9 @@
   border: 1px solid #ccc;
 ">
 <script>
-  // 매칭되는 노드 ID 저장용
   var matchNodes = [];
   var currentIndex = 0;
 
-  // 입력이 바뀔 때마다 인덱스 초기화 & 매칭 리스트 갱신
   document.getElementById('searchBox').addEventListener('input', function() {
     currentIndex = 0;
     var input = this.value.toLowerCase().trim();
@@ -164,29 +162,20 @@
       .map(n => n.id);
   });
 
-  // Enter 키 누를 때마다 순환 포커스 (keydown 사용)
   document.getElementById('searchBox').addEventListener('keydown', function(e) {
     if (e.key !== 'Enter' && e.keyCode !== 13) return;
+    if (!matchNodes.length) return;
 
-    if (!matchNodes.length) return;  // 매칭 없으면 종료
-
-    // 순환 인덱스 계산
     if (currentIndex >= matchNodes.length) {
       currentIndex = 0;
     }
     var nodeId = matchNodes[currentIndex++];
-    
-    // 선택 & 포커스
     network.selectNodes([nodeId]);
     network.focus(nodeId, {
       scale: 0.5,
-      animation: {
-        duration: 500,
-        easingFunction: 'easeInOutQuad'
-      }
+      animation: { duration: 500, easingFunction: 'easeInOutQuad' }
     });
-
-    e.preventDefault();  // 폼 제출 방지
+    e.preventDefault();
   });
 </script>
 
