@@ -303,55 +303,45 @@
 <!-- 노드 검색 입력창 -->
 <input type="text" id="searchBox" placeholder="노드 검색" style="
   position:absolute; top:10px; left:10px; z-index:999;
-  padding:6px; font-size:14px; border-radius:6px; border:1px solid #ccc;
-">
+  padding:6px; font-size:14px; border-radius:6px; border:1px solid #ccc;"
+>
 <script>
 window.addEventListener('load', function() {
-
-  var allEdges = network.body.data.edges.get();
-  var initEdges = allEdges.filter(e => e.from === 'CINOS');
-  initEdges.forEach(e => {
-    network.body.data.edges.update({ id: e.id, hidden: false });
-    network.body.data.nodes.update({ id: e.to, hidden: false });
-  });
-   // 검색 순환
+  // 1) 검색 순환 로직
   var matchNodes = [], idx = 0;
   var box = document.getElementById('searchBox');
-  box.addEventListener('input', function(){
+  box.addEventListener('input', function() {
     idx = 0;
     var kw = this.value.toLowerCase().trim();
     matchNodes = network.body.data.nodes.get()
       .filter(n => n.label && n.label.toLowerCase().includes(kw))
       .map(n => n.id);
   });
-  // (2) 클릭 시 자식 노드 확장 — 확대 없이
+  box.addEventListener('keydown', function(e) {
+    if (e.key !== 'Enter') return;
+    if (!matchNodes.length) return;
+    if (idx >= matchNodes.length) idx = 0;
+    var id = matchNodes[idx++];
+    network.selectNodes([id]);
+    network.focus(id, { scale: 1, animation: { duration: 300, easingFunction: 'easeInOutQuad' } });
+    e.preventDefault();
+  });
+
+  // 2) 클릭 시 자식 노드 확장 (moderate zoom)
   network.on('click', function(params) {
     if (!params.nodes.length) return;
     var pid = params.nodes[0];
-    var childE = allEdges.filter(e => e.from === pid);
+    var childE = network.body.data.edges.get().filter(e => e.from === pid);
     childE.forEach(e => {
       network.body.data.edges.update({ id: e.id, hidden: false });
       network.body.data.nodes.update({ id: e.to, hidden: false });
     });
-    // 확대(scale) 제거 → 화면 고정
-    // network.focus(pid, { scale:1, animation:{duration:300} });  // >>> 삭제 또는 주석 처리
+    network.focus(pid, { scale: 0.8, animation: { duration: 300, easingFunction: 'easeInOutQuad' } });
   });
 
-  // (3) 겹침 방지: physics 옵션으로 repulsion 강화
-  network.setOptions({
-    physics: {
-      hierarchicalRepulsion: {
-        nodeDistance: 200,
-        centralGravity: 0.0,
-        springConstant: 0.01
-      },
-      stabilization: { iterations: 200 }
-    }
-  });
-
-  // 스피너 숨기기
+  // 3) 로딩 스피너 숨기기
   var loader = document.getElementById('mynetwork-loading');
-  if (loader) loader.style.display='none';
+  if (loader) loader.style.display = 'none';
 });
 </script>
 </body>
