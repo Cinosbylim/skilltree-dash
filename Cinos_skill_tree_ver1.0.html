@@ -303,48 +303,61 @@
 <!-- 노드 검색 입력창 -->
 <input type="text" id="searchBox" placeholder="노드 검색" style="
   position:absolute; top:10px; left:10px; z-index:999;
-  padding:6px; font-size:14px; border-radius:6px; border:1px solid #ccc;
-">
+  padding:6px; font-size:14px; border-radius:6px; border:1px solid #ccc;"
+>
 <script>
 window.addEventListener('load', function() {
-  // (1) 초기 상태: CINOS 바로 연결된 level1 노드를 미리 보이게
-  var allEdges = network.body.data.edges.get();
-  var initEdges = allEdges.filter(e => e.from === 'CINOS');
-  initEdges.forEach(e => {
-    network.body.data.edges.update({ id: e.id, hidden: false });
-    network.body.data.nodes.update({ id: e.to, hidden: false });
-  });
+  // 검색 순환 (기존 구현 생략)...
 
-  // 검색 순환 (생략)
-
-  // (2) 클릭 시 자식 노드 확장 — 확대 없이
-  network.on('click', function(params) {
-    if (!params.nodes.length) return;
-    var pid = params.nodes[0];
-    var childE = allEdges.filter(e => e.from === pid);
-    childE.forEach(e => {
-      network.body.data.edges.update({ id: e.id, hidden: false });
-      network.body.data.nodes.update({ id: e.to, hidden: false });
-    });
-    // 확대(scale) 제거 → 화면 고정
-    // network.focus(pid, { scale:1, animation:{duration:300} });  // >>> 삭제 또는 주석 처리
-  });
-
-  // (3) 겹침 방지: physics 옵션으로 repulsion 강화
-  network.setOptions({
-    physics: {
-      hierarchicalRepulsion: {
-        nodeDistance: 200,
-        centralGravity: 0.0,
-        springConstant: 0.01
-      },
-      stabilization: { iterations: 200 }
+  // -----------------------------
+  // 클릭 시 자식 노드 사분면 배치
+  // -----------------------------
+  // 1) level-1 노드(팀구분) 위치 맵 생성
+  var quadMap = {};
+  network.body.data.nodes.get().forEach(function(n) {
+    if (n.id !== 'CINOS' && n.id.indexOf('::') < 0) {
+      // x>0,y<0: 4사분면 / x>0,y>0: 1사분면 / x<0,y>0:2사분면 / x<0,y<0:3사분면
+      var q = (n.x>0? (n.y>0?1:4) : (n.y>0?2:3));
+      quadMap[n.id] = q;
     }
   });
 
-  // 스피너 숨기기
-  var loader = document.getElementById('mynetwork-loading');
-  if (loader) loader.style.display='none';
+  network.on('click', function(params) {
+    if (!params.nodes.length) return;
+    var pid = params.nodes[0];
+
+    // 부모 위치
+    var pos = network.getPositions([pid])[pid];
+
+    // 해당 사분면 호(弧) 시작 각도 & 범위
+    var q = quadMap[pid] || 1;
+    var base = (q-1)*Math.PI/2;            // 0,90°,180°,270°
+    var startAng = base + Math.PI/8;       // 사분면 안 쪽으로 22.5°
+    var span = Math.PI/2 - Math.PI/4;      // 90°-45° = 45°
+
+    // 자식 엣지 & 노드
+    var children = network.body.data.edges.get().filter(e => e.from===pid);
+    var cnt = children.length;
+    if (cnt===0) return;
+
+    // R: 부모로부터 자식까지의 거리 (px)
+    var R = 200;
+
+    children.forEach(function(e,i) {
+      var ang = startAng + span*(i/(cnt-1));  // 균일 분포
+      var x = pos.x + R*Math.cos(ang);
+      var y = pos.y + R*Math.sin(ang);
+      // ① 엣지 보이기
+      network.body.data.edges.update({ id:e.id, hidden:false });
+      // ② 자식 노드 위치 고정 & 보이기
+      network.body.data.nodes.update({
+        id: e.to,
+        x: x, y: y, fixed: true, hidden: false
+      });
+    });
+
+    // 뷰는 그대로 유지(확대 없음)
+  });
 });
 </script>
 </body>
