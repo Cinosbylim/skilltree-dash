@@ -307,41 +307,44 @@
 ">
 <script>
 window.addEventListener('load', function() {
-  // 검색 순환
-  var matchNodes = [], idx = 0;
-  var box = document.getElementById('searchBox');
-  box.addEventListener('input', function(){
-    idx = 0;
-    var kw = this.value.toLowerCase().trim();
-    matchNodes = network.body.data.nodes.get()
-      .filter(n => n.label && n.label.toLowerCase().includes(kw))
-      .map(n => n.id);
-  });
-  box.addEventListener('keydown', function(e){
-    if (e.key !== 'Enter') return;
-    if (!matchNodes.length) return;
-    if (idx >= matchNodes.length) idx = 0;
-    var id = matchNodes[idx++];
-    network.selectNodes([id]);
-    network.focus(id, { scale: 1, animation: { duration: 300, easingFunction: 'easeInOutQuad' } });
-    e.preventDefault();
+  // (1) 초기 상태: CINOS 바로 연결된 level1 노드를 미리 보이게
+  var allEdges = network.body.data.edges.get();
+  var initEdges = allEdges.filter(e => e.from === 'CINOS');
+  initEdges.forEach(e => {
+    network.body.data.edges.update({ id: e.id, hidden: false });
+    network.body.data.nodes.update({ id: e.to, hidden: false });
   });
 
-  // 클릭 시 자식 노드 확장 (moderate zoom)
-  network.on('click', function(params){
+  // 검색 순환 (생략)
+
+  // (2) 클릭 시 자식 노드 확장 — 확대 없이
+  network.on('click', function(params) {
     if (!params.nodes.length) return;
     var pid = params.nodes[0];
-    var childE = network.body.data.edges.get().filter(e => e.from === pid);
+    var childE = allEdges.filter(e => e.from === pid);
     childE.forEach(e => {
       network.body.data.edges.update({ id: e.id, hidden: false });
       network.body.data.nodes.update({ id: e.to, hidden: false });
     });
-    network.focus(pid, { scale: 0.8, animation: { duration: 300, easingFunction: 'easeInOutQuad' } });
+    // 확대(scale) 제거 → 화면 고정
+    // network.focus(pid, { scale:1, animation:{duration:300} });  // >>> 삭제 또는 주석 처리
   });
 
-  // 로딩 스피너 숨기기
+  // (3) 겹침 방지: physics 옵션으로 repulsion 강화
+  network.setOptions({
+    physics: {
+      hierarchicalRepulsion: {
+        nodeDistance: 200,
+        centralGravity: 0.0,
+        springConstant: 0.01
+      },
+      stabilization: { iterations: 200 }
+    }
+  });
+
+  // 스피너 숨기기
   var loader = document.getElementById('mynetwork-loading');
-  if (loader) loader.style.display = 'none';
+  if (loader) loader.style.display='none';
 });
 </script>
 </body>
