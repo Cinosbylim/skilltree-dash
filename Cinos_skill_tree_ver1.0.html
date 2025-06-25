@@ -315,7 +315,7 @@ window.addEventListener('load', function() {
     network.body.data.nodes.update({ id: e.to, hidden: false });
   });
 
-  // 1) 검색 순환 로직
+  // 1) 검색 순환 로직 (Enter 시 확대)
   var matchNodes = [], idx = 0;
   var box = document.getElementById('searchBox');
   box.addEventListener('input', function() {
@@ -331,7 +331,11 @@ window.addEventListener('load', function() {
     if (idx >= matchNodes.length) idx = 0;
     var id = matchNodes[idx++];
     network.selectNodes([id]);
-    // 확대 기능 제거: focus 호출하지 않음
+    // 검색 순환 시 해당 노드로 확대
+    network.focus(id, {
+      scale: 0.8,
+      animation: { duration: 300, easingFunction: 'easeInOutQuad' }
+    });
     e.preventDefault();
   });
 
@@ -343,7 +347,7 @@ window.addEventListener('load', function() {
       network.body.data.edges.update({ id: e.id, hidden: false });
       network.body.data.nodes.update({ id: e.to, hidden: false });
     });
-    // 확대/포커스 호출 삭제
+    // no focus or zoom here
   });
 
   // 3) 로딩 스피너 숨기기
