@@ -307,6 +307,14 @@
 >
 <script>
 window.addEventListener('load', function() {
+  var allEdges = network.body.data.edges.get();
+
+  // 초기: CINOS → 레벨1 노드 미리 오픈
+  allEdges.filter(e => e.from === 'CINOS').forEach(e => {
+    network.body.data.edges.update({ id: e.id, hidden: false });
+    network.body.data.nodes.update({ id: e.to, hidden: false });
+  });
+
   // 1) 검색 순환 로직
   var matchNodes = [], idx = 0;
   var box = document.getElementById('searchBox');
@@ -323,20 +331,19 @@ window.addEventListener('load', function() {
     if (idx >= matchNodes.length) idx = 0;
     var id = matchNodes[idx++];
     network.selectNodes([id]);
-    network.focus(id, { scale: 1, animation: { duration: 300, easingFunction: 'easeInOutQuad' } });
+    // 확대 기능 제거: focus 호출하지 않음
     e.preventDefault();
   });
 
-  // 2) 클릭 시 자식 노드 확장 (moderate zoom)
+  // 2) 클릭 시 자식 노드만 확장 (확대/포커스 없이)
   network.on('click', function(params) {
     if (!params.nodes.length) return;
     var pid = params.nodes[0];
-    var childE = network.body.data.edges.get().filter(e => e.from === pid);
-    childE.forEach(e => {
+    allEdges.filter(e => e.from === pid).forEach(e => {
       network.body.data.edges.update({ id: e.id, hidden: false });
       network.body.data.nodes.update({ id: e.to, hidden: false });
     });
-    network.focus(pid, { scale: 0.8, animation: { duration: 300, easingFunction: 'easeInOutQuad' } });
+    // 확대/포커스 호출 삭제
   });
 
   // 3) 로딩 스피너 숨기기
