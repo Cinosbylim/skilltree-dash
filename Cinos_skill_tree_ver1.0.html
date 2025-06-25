@@ -197,7 +197,7 @@
                   // adding nodes and edges to the graph
                   data = {nodes: nodes, edges: edges};
 
-                  var options = {"interaction": {"navigationButtons": true, "keyboard": {"enabled": true, "bindToWindow": false}}, "physics": {"barnesHut": {"gravitationalConstant": -30000, "centralGravity": 0.3, "springLength": 250, "springConstant": 0.05, "damping": 0.09}}, "nodes": {"shape": "circle", "shapeProperties": {"useBorderWithLabel": true}, "widthConstraint": {"minimum": 120}, "margin": 10, "font": {"size": 22, "face": "Tahoma", "vadjust": 0, "align": "center"}}};
+                  var options = {"interaction": {"navigationButtons": true, "keyboard": {"enabled": true, "bindToWindow": false}}, "physics": {"solver": "forceAtlas2Based", "forceAtlas2Based": {"gravitationalConstant": -50, "centralGravity": 0.01, "springConstant": 0.08, "springLength": 100, "avoidOverlap": 1, "damping": 0.4}, "minVelocity": 0.1, "stabilization": {"enabled": true, "iterations": 2000, "updateInterval": 50}}, "nodes": {"shape": "circle", "shapeProperties": {"useBorderWithLabel": true}, "widthConstraint": {"minimum": 120}, "margin": 10, "font": {"size": 22, "face": "Tahoma", "vadjust": 0, "align": "center"}}};
 
                   
 
