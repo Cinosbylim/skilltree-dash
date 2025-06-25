@@ -314,7 +314,7 @@ window.addEventListener('load', function() {
     network.body.data.edges.update({ id: e.id, hidden: false });
     network.body.data.nodes.update({ id: e.to, hidden: false });
   });
-    // 검색 순환 (생략)
+   // 검색 순환
   var matchNodes = [], idx = 0;
   var box = document.getElementById('searchBox');
   box.addEventListener('input', function(){
@@ -323,7 +323,7 @@ window.addEventListener('load', function() {
     matchNodes = network.body.data.nodes.get()
       .filter(n => n.label && n.label.toLowerCase().includes(kw))
       .map(n => n.id);
-
+  });
   // (2) 클릭 시 자식 노드 확장 — 확대 없이
   network.on('click', function(params) {
     if (!params.nodes.length) return;
